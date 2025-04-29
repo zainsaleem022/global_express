@@ -698,7 +698,7 @@ export default function ShippingForm() {
               </AlertTitle>
               <AlertDescription className="text-blue-700">
                 <p className="mb-2">
-                  We couldn't find any delivery services for your specified
+                  We couldn&apos;t find any delivery services for your specified
                   route and package details.
                 </p>
                 <div className="mt-4 bg-white p-4 rounded-md border border-blue-100">
