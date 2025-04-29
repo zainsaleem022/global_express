@@ -74,9 +74,9 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
         {/* Main card content */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_auto]">
           {/* Left side - Service info */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              <h3 className="text-xl font-bold text-blue-700">
+              <h3 className="text-lg sm:text-xl font-bold text-blue-700">
                 {result.ServiceName}
               </h3>
               {result.ServiceType && (
@@ -94,7 +94,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
               <span className="font-medium">{result.CarrierName}</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
               <div className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
                 <div className="bg-blue-100 rounded-full p-2">
                   <Package className="h-5 w-5 text-blue-600" />
@@ -143,7 +143,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
                 <div className="bg-amber-100 rounded-full p-2">
                   <Calendar className="h-5 w-5 text-amber-600" />
                 </div>
-                <span>
+                <span className="text-sm">
                   Same Day Collection Cutoff:{" "}
                   <strong>{result.SameDayCollectionCutOffTime}</strong>
                 </span>
@@ -152,24 +152,24 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
           </div>
 
           {/* Right side - Price */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 flex flex-col justify-center items-center md:min-w-[220px] border-l border-blue-100">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 flex flex-col justify-center items-center md:min-w-[220px] border-t md:border-t-0 md:border-l border-blue-100">
             <div className="text-center">
-              <p className="text-3xl font-bold text-blue-700">
+              <p className="text-2xl sm:text-3xl font-bold text-blue-700">
                 £{result.TotalCost.TotalCostGrossWithCollection.toFixed(2)}
               </p>
               <p className="text-sm text-blue-600 font-medium">
                 with collection
               </p>
 
-              <Separator className="my-4 bg-blue-200/50" />
+              <Separator className="my-3 sm:my-4 bg-blue-200/50" />
 
-              <p className="text-lg font-medium text-gray-700">
+              <p className="text-base sm:text-lg font-medium text-gray-700">
                 £{result.TotalCost.TotalCostGrossWithoutCollection.toFixed(2)}
               </p>
               <p className="text-xs text-gray-500">without collection</p>
             </div>
 
-            <Button className="mt-6 w-full bg-blue-600 hover:bg-blue-700 transition-colors font-medium">
+            <Button className="mt-4 sm:mt-6 w-full bg-blue-600 hover:bg-blue-700 transition-colors font-medium">
               Select Service
             </Button>
           </div>
@@ -193,7 +193,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
 
       {/* Expanded details section */}
       {isExpanded && (
-        <div className="border-t border-gray-100 bg-gray-50 p-6">
+        <div className="border-t border-gray-100 bg-gray-50 p-4 sm:p-6">
           <div className="grid gap-6 md:grid-cols-2">
             {result.ServicePriceBreakdown.length > 0 && (
               <div className="space-y-3">
@@ -203,7 +203,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
                   </span>
                   Price Breakdown
                 </h4>
-                <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                <div className="bg-white rounded-lg p-3 sm:p-4 border border-gray-100 shadow-sm">
                   <ul className="space-y-2 divide-y divide-gray-100">
                     {result.ServicePriceBreakdown.map((item, index) => (
                       <li
@@ -231,7 +231,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
                   </span>
                   Optional Extras
                 </h4>
-                <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+                <div className="bg-white rounded-lg p-3 sm:p-4 border border-gray-100 shadow-sm">
                   <ul className="space-y-2 divide-y divide-gray-100">
                     {result.OptionalExtras.map((extra, index) => (
                       <li
@@ -264,7 +264,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
                 {result.CollectionOptions.map((option) => (
                   <div
                     key={option.CollectionOptionID}
-                    className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm hover:shadow transition-shadow"
+                    className="rounded-lg border border-gray-100 bg-white p-3 sm:p-4 shadow-sm hover:shadow transition-shadow"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                       <h5 className="font-medium text-blue-700">
@@ -324,7 +324,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
                 </span>
                 Expected Labels
               </h4>
-              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                 {result.ExpectedLabels.map((label, index) => (
                   <div
                     key={index}

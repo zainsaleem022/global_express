@@ -339,8 +339,9 @@ export default function ShippingForm() {
   return (
     <div className="space-y-8">
       <form onSubmit={handleSubmit} className="grid gap-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
+        {/* From/To Section - Stacks on mobile */}
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="space-y-2">
             <div className="mb-2 text-center text-sm font-medium">
               Sending from...
             </div>
@@ -363,7 +364,7 @@ export default function ShippingForm() {
               </SelectContent>
             </Select>
             {formErrors.fromCountry && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-xs text-red-500">
                 {formErrors.fromCountry}
               </p>
             )}
@@ -379,12 +380,12 @@ export default function ShippingForm() {
               }
             />
             {formErrors.fromPostcode && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-xs text-red-500">
                 {formErrors.fromPostcode}
               </p>
             )}
           </div>
-          <div>
+          <div className="space-y-2">
             <div className="mb-2 text-center text-sm font-medium">
               Delivered to...
             </div>
@@ -407,7 +408,7 @@ export default function ShippingForm() {
               </SelectContent>
             </Select>
             {formErrors.toCountry && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-xs text-red-500">
                 {formErrors.toCountry}
               </p>
             )}
@@ -421,22 +422,24 @@ export default function ShippingForm() {
               onChange={(e) => handleInputChange("toPostcode", e.target.value)}
             />
             {formErrors.toPostcode && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-xs text-red-500">
                 {formErrors.toPostcode}
               </p>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Number of packages</div>
+        {/* Package Details Section - Responsive layout */}
+        <div className="grid gap-6 sm:grid-cols-2">
+          {/* Left Column - Package Info */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="text-sm font-medium">Number of packages</div>
               <Select
                 value={formData.quantity}
                 onValueChange={(value) => handleInputChange("quantity", value)}
               >
-                <SelectTrigger className="w-[100px]">
+                <SelectTrigger className="w-full sm:w-[100px]">
                   <SelectValue placeholder="1" />
                 </SelectTrigger>
                 <SelectContent>
@@ -449,13 +452,13 @@ export default function ShippingForm() {
               </Select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="text-sm">What are you sending?</div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="text-sm font-medium">What are you sending?</div>
               <Select
                 value={formData.itemType}
                 onValueChange={(value) => handleInputChange("itemType", value)}
               >
-                <SelectTrigger className="w-[250px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Select item type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -464,22 +467,20 @@ export default function ShippingForm() {
                   <SelectItem value="document">Document</SelectItem>
                 </SelectContent>
               </Select>
-              {formErrors.itemType && (
-                <p className="mt-1 text-sm text-red-500">
-                  {formErrors.itemType}
-                </p>
-              )}
             </div>
+            {formErrors.itemType && (
+              <p className="text-xs text-red-500">{formErrors.itemType}</p>
+            )}
 
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Outer Packaging Type:</div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="text-sm font-medium">Outer Packaging Type:</div>
               <Select
                 value={formData.packagingType}
                 onValueChange={(value) =>
                   handleInputChange("packagingType", value)
                 }
               >
-                <SelectTrigger className="w-[250px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Select packaging" />
                 </SelectTrigger>
                 <SelectContent>
@@ -488,111 +489,13 @@ export default function ShippingForm() {
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
-              {formErrors.packagingType && (
-                <p className="mt-1 text-sm text-red-500">
-                  {formErrors.packagingType}
-                </p>
-              )}
             </div>
-          </div>
+            {formErrors.packagingType && (
+              <p className="text-xs text-red-500">{formErrors.packagingType}</p>
+            )}
 
-          <div>
-            <div className="mb-4">
-              <div className="grid grid-cols-4 gap-2 border-b border-gray-200 pb-2">
-                <div className="text-center text-sm font-medium">Weight</div>
-                <div className="text-center text-sm font-medium">Length</div>
-                <div className="text-center text-sm font-medium">Width</div>
-                <div className="text-center text-sm font-medium">Height</div>
-              </div>
-              <div className="max-h-[300px] overflow-y-auto">
-                {formData.packages.map((pkg, index) => (
-                  <div
-                    key={index}
-                    className="grid grid-cols-4 gap-2 border-b border-gray-100 py-2 last:border-0"
-                  >
-                    <div>
-                      <Input
-                        type="text"
-                        placeholder={weightPlaceholder}
-                        className={`text-center ${
-                          pkg.errors?.weight ? "border-red-500" : ""
-                        }`}
-                        value={pkg.weight}
-                        onChange={(e) =>
-                          handlePackageChange(index, "weight", e.target.value)
-                        }
-                      />
-                      {pkg.errors?.weight && (
-                        <p className="mt-1 text-xs text-red-500">
-                          {pkg.errors.weight}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <Input
-                        type="text"
-                        placeholder={dimensionPlaceholder}
-                        className={`text-center ${
-                          pkg.errors?.length ? "border-red-500" : ""
-                        }`}
-                        value={pkg.length}
-                        onChange={(e) =>
-                          handlePackageChange(index, "length", e.target.value)
-                        }
-                      />
-                      {pkg.errors?.length && (
-                        <p className="mt-1 text-xs text-red-500">
-                          {pkg.errors.length}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <Input
-                        type="text"
-                        placeholder={dimensionPlaceholder}
-                        className={`text-center ${
-                          pkg.errors?.width ? "border-red-500" : ""
-                        }`}
-                        value={pkg.width}
-                        onChange={(e) =>
-                          handlePackageChange(index, "width", e.target.value)
-                        }
-                      />
-                      {pkg.errors?.width && (
-                        <p className="mt-1 text-xs text-red-500">
-                          {pkg.errors.width}
-                        </p>
-                      )}
-                    </div>
-                    <div>
-                      <Input
-                        type="text"
-                        placeholder={dimensionPlaceholder}
-                        className={`text-center ${
-                          pkg.errors?.height ? "border-red-500" : ""
-                        }`}
-                        value={pkg.height}
-                        onChange={(e) =>
-                          handlePackageChange(index, "height", e.target.value)
-                        }
-                      />
-                      {pkg.errors?.height && (
-                        <p className="mt-1 text-xs text-red-500">
-                          {pkg.errors.height}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {formErrors.packages && (
-                <p className="mt-2 text-sm text-red-500">
-                  {formErrors.packages}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center justify-center gap-4">
-              <div className="text-sm">Measurements:</div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
+              <div className="text-sm font-medium">Measurements:</div>
               <RadioGroup
                 value={formData.measurementUnit}
                 onValueChange={(value) =>
@@ -615,6 +518,112 @@ export default function ShippingForm() {
               </RadioGroup>
             </div>
           </div>
+
+          {/* Right Column - Package Dimensions */}
+          <div>
+            <div className="mb-2">
+              <div className="grid grid-cols-4 gap-2 border-b border-gray-200 pb-2">
+                <div className="text-center text-xs sm:text-sm font-medium">
+                  Weight
+                </div>
+                <div className="text-center text-xs sm:text-sm font-medium">
+                  Length
+                </div>
+                <div className="text-center text-xs sm:text-sm font-medium">
+                  Width
+                </div>
+                <div className="text-center text-xs sm:text-sm font-medium">
+                  Height
+                </div>
+              </div>
+              <div className="max-h-[200px] overflow-y-auto">
+                {formData.packages.map((pkg, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-4 gap-2 border-b border-gray-100 py-2 last:border-0"
+                  >
+                    <div>
+                      <Input
+                        type="text"
+                        placeholder={weightPlaceholder}
+                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                          pkg.errors?.weight ? "border-red-500" : ""
+                        }`}
+                        value={pkg.weight}
+                        onChange={(e) =>
+                          handlePackageChange(index, "weight", e.target.value)
+                        }
+                      />
+                      {pkg.errors?.weight && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {pkg.errors.weight}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        type="text"
+                        placeholder={dimensionPlaceholder}
+                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                          pkg.errors?.length ? "border-red-500" : ""
+                        }`}
+                        value={pkg.length}
+                        onChange={(e) =>
+                          handlePackageChange(index, "length", e.target.value)
+                        }
+                      />
+                      {pkg.errors?.length && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {pkg.errors.length}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        type="text"
+                        placeholder={dimensionPlaceholder}
+                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                          pkg.errors?.width ? "border-red-500" : ""
+                        }`}
+                        value={pkg.width}
+                        onChange={(e) =>
+                          handlePackageChange(index, "width", e.target.value)
+                        }
+                      />
+                      {pkg.errors?.width && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {pkg.errors.width}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <Input
+                        type="text"
+                        placeholder={dimensionPlaceholder}
+                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                          pkg.errors?.height ? "border-red-500" : ""
+                        }`}
+                        value={pkg.height}
+                        onChange={(e) =>
+                          handlePackageChange(index, "height", e.target.value)
+                        }
+                      />
+                      {pkg.errors?.height && (
+                        <p className="mt-1 text-xs text-red-500">
+                          {pkg.errors.height}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {formErrors.packages && (
+                <p className="mt-2 text-xs text-red-500">
+                  {formErrors.packages}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-col items-center gap-4">
@@ -622,7 +631,7 @@ export default function ShippingForm() {
           <Button
             type="submit"
             size="lg"
-            className="gap-2 bg-blue-600 px-8 hover:bg-blue-700"
+            className="gap-2 bg-blue-600 px-8 w-full sm:w-auto hover:bg-blue-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Get a quote"}
@@ -632,11 +641,11 @@ export default function ShippingForm() {
       </form>
 
       {results && results.length > 0 && (
-        <div className="mt-12 pt-8 border-t border-gray-200">
-          <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">
+        <div className="mt-8 pt-8 border-t border-gray-200">
+          <h2 className="text-xl sm:text-2xl font-bold text-blue-700 mb-6 text-center">
             Available Services
           </h2>
-          <div className="space-y-8">
+          <div className="space-y-6">
             {results.map((result) => (
               <ServiceResultCard key={result.ServiceID} result={result} />
             ))}
