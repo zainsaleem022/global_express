@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertCircle, Info } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/src/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/src/components/ui/alert";
 import ServiceResultCard from "./ServiceResultCard";
 
 interface PackageDimensions {
@@ -96,12 +97,17 @@ interface ServiceResult {
   ServiceType?: string;
 }
 
+interface ApiNotification {
+  Message: string;
+  Severity: string;
+}
+
 interface ApiResponse {
   success: boolean;
   message: string;
   data: {
     Status: string;
-    Notifications: string[];
+    Notifications: ApiNotification[];
     QuoteID: number;
     ServiceResults: ServiceResult[];
   };
@@ -132,8 +138,12 @@ export default function ShippingForm() {
   const [countries, setCountries] = useState<Country[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [apiNotifications, setApiNotifications] = useState<ApiNotification[]>(
+    []
+  );
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [results, setResults] = useState<ServiceResult[] | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     if (results) {
@@ -245,11 +255,9 @@ export default function ShippingForm() {
   const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
 
-    // Validate required fields
+    // Validate required fields (postal codes are now optional)
     if (!formData.fromCountry) errors.fromCountry = "Please select a country";
-    if (!formData.fromPostcode) errors.fromPostcode = "Postcode is required";
     if (!formData.toCountry) errors.toCountry = "Please select a country";
-    if (!formData.toPostcode) errors.toPostcode = "Postcode is required";
     if (!formData.itemType) errors.itemType = "Please select an item type";
     if (!formData.packagingType)
       errors.packagingType = "Please select a packaging type";
@@ -268,6 +276,8 @@ export default function ShippingForm() {
     e.preventDefault();
     setSubmitError(null);
     setResults(null); // Clear previous results
+    setHasSearched(false);
+    setApiNotifications([]);
 
     if (!validateForm()) {
       return;
@@ -312,14 +322,35 @@ export default function ShippingForm() {
 
       const data: ApiResponse = await response.json();
 
-      if (!response.ok) {
+      if (data.data && data.data.Status === "FAIL" && data.data.Notifications) {
+        setApiNotifications(data.data.Notifications);
+
+        // Check if the failure is due to missing postal codes
+        const hasPostcodeError = data.data.Notifications.some(
+          (notification) =>
+            notification.Message &&
+            notification.Message.toLowerCase().includes("postcode")
+        );
+
+        if (hasPostcodeError) {
+          setSubmitError(
+            "Postal codes are required for the selected countries"
+          );
+        } else {
+          setSubmitError(data.message || "Failed to get shipping quotes");
+        }
+
+        setHasSearched(true);
+        setResults([]);
+      } else if (!response.ok) {
         throw new Error(
           data.message || "Failed to submit shipping information"
         );
+      } else {
+        setResults(data.data.ServiceResults);
+        setHasSearched(true);
+        console.log("Shipping information submitted successfully:", data);
       }
-
-      setResults(data.data.ServiceResults);
-      console.log("Shipping information submitted successfully:", data);
     } catch (error) {
       console.error("Error submitting shipping information:", error);
       setSubmitError(
@@ -370,20 +401,13 @@ export default function ShippingForm() {
             )}
             <Input
               type="text"
-              placeholder="Postcode (required)"
-              className={`mt-2 ${
-                formErrors.fromPostcode ? "border-red-500" : ""
-              }`}
+              placeholder="Postal/ZIP code (recommended)"
+              className="mt-2"
               value={formData.fromPostcode}
               onChange={(e) =>
                 handleInputChange("fromPostcode", e.target.value)
               }
             />
-            {formErrors.fromPostcode && (
-              <p className="mt-1 text-xs text-red-500">
-                {formErrors.fromPostcode}
-              </p>
-            )}
           </div>
           <div className="space-y-2">
             <div className="mb-2 text-center text-sm font-medium">
@@ -394,7 +418,7 @@ export default function ShippingForm() {
               onValueChange={(value) => handleInputChange("toCountry", value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Please Select" />
+                <SelectValue placeholder="Select a country" />
               </SelectTrigger>
               <SelectContent>
                 {countries.map((country) => (
@@ -414,18 +438,11 @@ export default function ShippingForm() {
             )}
             <Input
               type="text"
-              placeholder="Postcode (required)"
-              className={`mt-2 ${
-                formErrors.toPostcode ? "border-red-500" : ""
-              }`}
+              placeholder="Postal/ZIP code (recommended)"
+              className="mt-2"
               value={formData.toPostcode}
               onChange={(e) => handleInputChange("toPostcode", e.target.value)}
             />
-            {formErrors.toPostcode && (
-              <p className="mt-1 text-xs text-red-500">
-                {formErrors.toPostcode}
-              </p>
-            )}
           </div>
         </div>
 
@@ -543,17 +560,19 @@ export default function ShippingForm() {
                     className="grid grid-cols-4 gap-2 border-b border-gray-100 py-2 last:border-0"
                   >
                     <div>
-                      <Input
-                        type="text"
-                        placeholder={weightPlaceholder}
-                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
-                          pkg.errors?.weight ? "border-red-500" : ""
-                        }`}
-                        value={pkg.weight}
-                        onChange={(e) =>
-                          handlePackageChange(index, "weight", e.target.value)
-                        }
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder={weightPlaceholder}
+                          className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                            pkg.errors?.weight ? "border-red-500" : ""
+                          }`}
+                          value={pkg.weight}
+                          onChange={(e) =>
+                            handlePackageChange(index, "weight", e.target.value)
+                          }
+                        />
+                      </div>
                       {pkg.errors?.weight && (
                         <p className="mt-1 text-xs text-red-500">
                           {pkg.errors.weight}
@@ -561,17 +580,19 @@ export default function ShippingForm() {
                       )}
                     </div>
                     <div>
-                      <Input
-                        type="text"
-                        placeholder={dimensionPlaceholder}
-                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
-                          pkg.errors?.length ? "border-red-500" : ""
-                        }`}
-                        value={pkg.length}
-                        onChange={(e) =>
-                          handlePackageChange(index, "length", e.target.value)
-                        }
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder={dimensionPlaceholder}
+                          className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                            pkg.errors?.length ? "border-red-500" : ""
+                          }`}
+                          value={pkg.length}
+                          onChange={(e) =>
+                            handlePackageChange(index, "length", e.target.value)
+                          }
+                        />
+                      </div>
                       {pkg.errors?.length && (
                         <p className="mt-1 text-xs text-red-500">
                           {pkg.errors.length}
@@ -579,17 +600,19 @@ export default function ShippingForm() {
                       )}
                     </div>
                     <div>
-                      <Input
-                        type="text"
-                        placeholder={dimensionPlaceholder}
-                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
-                          pkg.errors?.width ? "border-red-500" : ""
-                        }`}
-                        value={pkg.width}
-                        onChange={(e) =>
-                          handlePackageChange(index, "width", e.target.value)
-                        }
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder={dimensionPlaceholder}
+                          className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                            pkg.errors?.width ? "border-red-500" : ""
+                          }`}
+                          value={pkg.width}
+                          onChange={(e) =>
+                            handlePackageChange(index, "width", e.target.value)
+                          }
+                        />
+                      </div>
                       {pkg.errors?.width && (
                         <p className="mt-1 text-xs text-red-500">
                           {pkg.errors.width}
@@ -597,17 +620,19 @@ export default function ShippingForm() {
                       )}
                     </div>
                     <div>
-                      <Input
-                        type="text"
-                        placeholder={dimensionPlaceholder}
-                        className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
-                          pkg.errors?.height ? "border-red-500" : ""
-                        }`}
-                        value={pkg.height}
-                        onChange={(e) =>
-                          handlePackageChange(index, "height", e.target.value)
-                        }
-                      />
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder={dimensionPlaceholder}
+                          className={`text-center text-xs sm:text-sm px-1 sm:px-2 h-8 sm:h-10 ${
+                            pkg.errors?.height ? "border-red-500" : ""
+                          }`}
+                          value={pkg.height}
+                          onChange={(e) =>
+                            handlePackageChange(index, "height", e.target.value)
+                          }
+                        />
+                      </div>
                       {pkg.errors?.height && (
                         <p className="mt-1 text-xs text-red-500">
                           {pkg.errors.height}
@@ -640,16 +665,79 @@ export default function ShippingForm() {
         </div>
       </form>
 
-      {results && results.length > 0 && (
+      {/* Results Section */}
+      {hasSearched && (
         <div className="mt-8 pt-8 border-t border-gray-200">
           <h2 className="text-xl sm:text-2xl font-bold text-blue-700 mb-6 text-center">
             Available Services
           </h2>
-          <div className="space-y-6">
-            {results.map((result) => (
-              <ServiceResultCard key={result.ServiceID} result={result} />
-            ))}
-          </div>
+
+          {/* API Notifications */}
+          {apiNotifications.length > 0 && (
+            <Alert className="bg-amber-50 border-amber-200 mb-6">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <AlertTitle className="text-amber-800 font-medium">
+                Important Information
+              </AlertTitle>
+              <AlertDescription className="text-amber-700">
+                <ul className="list-disc pl-5 space-y-1 mt-2">
+                  {apiNotifications.map((notification, index) => (
+                    <li key={index}>{notification.Message}</li>
+                  ))}
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* No results message */}
+          {results && results.length === 0 && (
+            <Alert className="bg-blue-50 border-blue-200 mb-6">
+              <AlertCircle className="h-5 w-5 text-blue-600" />
+              <AlertTitle className="text-blue-800 font-medium">
+                No delivery services available
+              </AlertTitle>
+              <AlertDescription className="text-blue-700">
+                <p className="mb-2">
+                  We couldn't find any delivery services for your specified
+                  route and package details.
+                </p>
+                <div className="mt-4 bg-white p-4 rounded-md border border-blue-100">
+                  <h4 className="font-medium text-gray-800 mb-2 flex items-center gap-2">
+                    <Info className="h-4 w-4 text-blue-600" />
+                    Possible reasons:
+                  </h4>
+                  <ul className="list-disc pl-5 text-sm text-gray-700 space-y-1">
+                    <li>The destination may be outside our service area</li>
+                    <li>Package dimensions or weight exceed carrier limits</li>
+                    {apiNotifications.some((n) =>
+                      n.Message.toLowerCase().includes("postcode")
+                    ) && (
+                      <li className="font-medium">
+                        Postal codes are required for the selected countries
+                      </li>
+                    )}
+                    <li>
+                      The postcode entered may be invalid or not recognized
+                    </li>
+                    <li>Temporary service disruption on this route</li>
+                  </ul>
+                  <div className="mt-4 text-sm text-gray-700">
+                    Try adjusting your package details or contact our customer
+                    service for assistance.
+                  </div>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Results list */}
+          {results && results.length > 0 && (
+            <div className="space-y-6">
+              {results.map((result) => (
+                <ServiceResultCard key={result.ServiceID} result={result} />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

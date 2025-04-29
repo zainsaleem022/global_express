@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     // console.log("Received shipping form data:", JSON.stringify(data, null, 2));
 
     // Validate quantity and packages
-    const quantity = parseInt(data.quantity, 10);
+    const quantity = Number.parseInt(data.quantity, 10);
     if (isNaN(quantity) || quantity !== data.packages.length) {
       return NextResponse.json(
         {
@@ -39,10 +39,10 @@ export async function POST(request: Request) {
 
     // Transform packages
     const packages = data.packages.map((pkg: PackageData) => ({
-      Weight: parseFloat(pkg.weight),
-      Length: parseFloat(pkg.length),
-      Width: parseFloat(pkg.width),
-      Height: parseFloat(pkg.height),
+      Weight: Number.parseFloat(pkg.weight),
+      Length: Number.parseFloat(pkg.length),
+      Width: Number.parseFloat(pkg.width),
+      Height: Number.parseFloat(pkg.height),
     }));
 
     // Construct API request payload
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         },
         CollectionAddress: {
           City: "", // Per Python example
-          Postcode: data.fromPostcode,
+          Postcode: data.fromPostcode || "", // Allow empty postal codes
           Country: {
             CountryID: data.fromCountry.CountryID,
             CountryCode: data.fromCountry.CountryCode,
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         },
         DeliveryAddress: {
           City: "", // Per Python example
-          Postcode: data.toPostcode,
+          Postcode: data.toPostcode || "", // Allow empty postal codes
           Country: {
             CountryID: data.toCountry.CountryID,
             CountryCode: data.toCountry.CountryCode,
@@ -89,21 +89,14 @@ export async function POST(request: Request) {
 
     const apiData = await apiResponse.json();
 
-    if (apiData.Status !== "SUCCESS") {
-      console.error("API error:", apiData.Notifications);
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to retrieve quote",
-          errors: apiData.Notifications,
-        },
-        { status: 500 }
-      );
-    }
-
+    // Pass through the API response even if it has a FAIL status
+    // This allows the frontend to handle specific error messages
     return NextResponse.json({
-      success: true,
-      message: "Shipping quote retrieved successfully",
+      success: apiData.Status === "SUCCESS",
+      message:
+        apiData.Status === "SUCCESS"
+          ? "Shipping quote retrieved successfully"
+          : "Failed to retrieve quote",
       data: apiData,
     });
   } catch (error) {

@@ -1,11 +1,12 @@
 import { Button } from "@/src/components/ui/button";
 import ShippingForm from "@/src/components/shipping-form";
+import { LogIn, UserPlus } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-white">
-        <div className="container flex h-14 sm:h-16 items-center px-4 md:px-6">
+        <div className="container flex h-14 sm:h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <span className="text-lg sm:text-xl font-bold text-blue-600">
               GlobalExpress
@@ -13,6 +14,24 @@ export default function Home() {
             <span className="hidden sm:inline text-sm text-muted-foreground">
               delivering worldwide, sustainably
             </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+            >
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Login</span>
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden sm:inline">Register</span>
+            </Button>
           </div>
         </div>
       </header>
@@ -31,28 +50,6 @@ export default function Home() {
             </Button>
             <Button variant="ghost" size="sm">
               Track
-            </Button>
-            <Button variant="ghost" size="sm">
-              Services
-            </Button>
-            <Button variant="ghost" size="sm">
-              Information
-            </Button>
-            <Button variant="ghost" size="sm">
-              Tools
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="bg-blue-100 text-blue-600"
-            >
-              Featured
-            </Button>
-            <Button variant="ghost" size="sm">
-              Shop Integrations
-            </Button>
-            <Button variant="ghost" size="sm">
-              Packaging Shop
             </Button>
           </div>
         </div>
@@ -137,7 +134,6 @@ export default function Home() {
                     className="h-6 w-6 sm:h-8 sm:w-8"
                   >
                     <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2" />
-                    <path d="m6 17 3.13-5.78c.53-.97.43-2.22-.26-3.07A2.97 2.97 0 0 1 8.5 6" />
                     <path d="m6 17 3.13-5.78c.53-.97.43-2.22-.26-3.07A2.97 2.97 0 0 1 8.5 6" />
                     <path d="M12 16v-3" />
                     <path d="M12 9V7" />

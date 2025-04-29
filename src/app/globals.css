@@ -57,3 +57,26 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix for input field boundaries */
+input::placeholder {
+  opacity: 0.7;
+}
+
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure inputs don't overflow their containers */
+input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix for dimension inputs */
+.dimension-input {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
