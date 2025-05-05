@@ -5,14 +5,14 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import Header from "./header";
 import Footer from "./footer";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
+import { useAuthStore } from "../../../src/lib/store/useAuthStore";
 
 interface SiteLayoutProps {
   children: React.ReactNode;
 }
 
 export default function SiteLayout({ children }: SiteLayoutProps) {
-  const { checkAuth, loading } = useAuthStore();
+  const { checkAuth } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
 
   // Set isClient to true when component mounts (client-side only)

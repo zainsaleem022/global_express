@@ -10,10 +10,11 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
+  token?: string;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   setAuthenticated: (isAuthenticated: boolean) => void;
-  login: (user: User) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
   checkAuth: () => Promise<void>;
 }
@@ -27,9 +28,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   setLoading: (loading) => set({ loading }),
   setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
 
-  login: (user) => {
+  login: (user, token) => {
     console.log("Login called with user:", user ? user.name : "No user");
-    set({ user, isAuthenticated: true, loading: false });
+    set({ user, isAuthenticated: true, loading: false, token });
   },
 
   logout: async () => {

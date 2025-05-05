@@ -1,9 +1,9 @@
 import type React from "react";
-import "@/src/app/globals.css";
+import "./globals.css";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/src/components/theme-provider";
-import { connectToDatabase } from "@/src/lib/mongodb";
-import TanStackQueryProviderWrapper from "@/src/components/providers/tanstack-query-provider-wrapper";
+import { ThemeProvider } from "../../src/components/theme-provider";
+import { connectToDatabase } from "../../src/lib/mongodb";
+import TanStackQueryProviderWrapper from "../../src/components/providers/tanstack-query-provider-wrapper";
 
 // Initialize database connection when the app starts
 connectToDatabase().catch(console.error);

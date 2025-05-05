@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 // Dynamically import the TanStackQueryProvider to avoid SSR issues
 const TanStackQueryProvider = dynamic(
-  () => import("@/src/components/providers/tanstack-query-provider"),
+  () => import("../../../src/components/providers/tanstack-query-provider"),
   {
     ssr: false,
   }

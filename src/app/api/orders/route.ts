@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import Order from "@/src/lib/models/Order";
-import { verifyToken } from "@/src/lib/auth/jwt";
+import Order from "../../../../src/lib/models/Order";
+import { verifyToken } from "../../../../src/lib/auth/jwt";
 
 // GET handler to fetch orders for the current user
 export async function GET(req: NextRequest) {

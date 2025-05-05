@@ -13,12 +13,12 @@ import {
   Lock,
   User,
 } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { Alert, AlertDescription } from "@/src/components/ui/alert";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
-import SiteLayout from "@/src/components/layout/site-layout";
+import { Button } from "../../../src/components/ui/button";
+import { Input } from "../../../src/components/ui/input";
+import { Label } from "../../../src/components/ui/label";
+import { Alert, AlertDescription } from "../../../src/components/ui/alert";
+import { useAuthStore } from "../../../src/lib/store/useAuthStore";
+import SiteLayout from "../../../src/components/layout/site-layout";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({

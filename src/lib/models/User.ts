@@ -1,4 +1,3 @@
-import { connectToDatabase } from "@/src/lib/mongodb";
 import mongoose from "mongoose";
 import type { Document } from "mongoose";
 

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/src/components/ui/button";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
+import { Button } from "../../../src/components/ui/button";
+import { useAuthStore } from "../../../src/lib/store/useAuthStore";
 import { Package } from "lucide-react";
 import { useEffect, useState } from "react";
 

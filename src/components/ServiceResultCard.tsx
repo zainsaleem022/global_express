@@ -11,9 +11,9 @@ import {
   XCircle,
   Calendar,
 } from "lucide-react";
-import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
-import { Separator } from "@/src/components/ui/separator";
+import { Badge } from "../../src/components/ui/badge";
+import { Button } from "../../src/components/ui/button";
+import { Separator } from "../../src/components/ui/separator";
 
 export interface ServiceResult {
   ServiceID: number;

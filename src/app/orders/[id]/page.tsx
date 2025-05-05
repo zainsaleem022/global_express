@@ -1,22 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import SiteLayout from "@/src/components/layout/site-layout";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
-import { Button } from "@/src/components/ui/button";
+import { useRouter, useParams } from "next/navigation";
+import SiteLayout from "../../../../src/components/layout/site-layout";
+import { useAuthStore } from "../../../../src/lib/store/useAuthStore";
+import { Button } from "../../../../src/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import { Badge } from "@/src/components/ui/badge";
-import { Skeleton } from "@/src/components/ui/skeleton";
-import { Separator } from "@/src/components/ui/separator";
+} from "../../../../src/components/ui/card";
+import { Badge } from "../../../../src/components/ui/badge";
+import { Skeleton } from "../../../../src/components/ui/skeleton";
+import { Separator } from "../../../../src/components/ui/separator";
 import { AlertCircle, ArrowLeft, Package, Truck } from "lucide-react";
 import { format } from "date-fns";
+
+interface OrderDetail {
+  CollectionAddress?: {
+    City: string;
+    Postcode: string;
+    Country: { Title: string };
+  };
+  DeliveryAddress?: {
+    City: string;
+    Postcode: string;
+    Country: { Title: string };
+  };
+  TransitTimeEstimate?: number;
+  Consignment?: {
+    Packages: Array<PackageDetail>;
+  };
+  ServiceResults?: Array<{
+    ServiceName: string;
+    CarrierName: string;
+    TransitTimeEstimate: number;
+    TotalCost: {
+      TotalCostGrossWithCollection: number;
+    };
+  }>;
+}
 
 interface Order {
   _id: string;
@@ -26,20 +51,23 @@ interface Order {
   trackingNumber?: string;
   serviceType?: string;
   carrierName?: string;
-  orderDetails: any;
+  orderDetails: OrderDetail;
 }
 
-export default function OrderDetailsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+interface PackageDetail {
+  Weight: number;
+  Length: number;
+  Width: number;
+  Height: number;
+}
+
+export default function OrderDetailsPage() {
+  const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
-  const { id } = params;
 
   useEffect(() => {
     // Redirect if not authenticated (this is a backup, middleware should handle this)
@@ -286,7 +314,7 @@ export default function OrderDetailsPage({
                         </thead>
                         <tbody>
                           {order.orderDetails.Consignment.Packages.map(
-                            (pkg: any, index: number) => (
+                            (pkg: PackageDetail, index: number) => (
                               <tr key={index} className="border-b">
                                 <td className="px-4 py-3">
                                   Package {index + 1}
@@ -390,8 +418,8 @@ export default function OrderDetailsPage({
               Order Not Found
             </h3>
             <p className="mt-2 text-red-700">
-              The order you're looking for doesn't exist or you don't have
-              permission to view it.
+              The order you&apos;re looking for doesn&apos;t exist or you
+              don&apos;t have permission to view it.
             </p>
             <Button
               className="mt-6 bg-red-600 hover:bg-red-700 text-white"

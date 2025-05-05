@@ -1,5 +1,5 @@
-import ShippingForm from "@/src/components/shipping-form";
-import SiteLayout from "@/src/components/layout/site-layout";
+import ShippingForm from "../../src/components/shipping-form";
+import SiteLayout from "../../src/components/layout/site-layout";
 
 export const metadata = {
   title: "GlobalExpress - Worldwide Delivery Services",

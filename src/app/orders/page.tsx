@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import SiteLayout from "@/src/components/layout/site-layout";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
-import { Button } from "@/src/components/ui/button";
+import SiteLayout from "../../../src/components/layout/site-layout";
+import { useAuthStore } from "../../../src/lib/store/useAuthStore";
+import { Button } from "../../../src/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,17 +12,47 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/src/components/ui/card";
-import { Badge } from "@/src/components/ui/badge";
+} from "../../../src/components/ui/card";
+import { Badge } from "../../../src/components/ui/badge";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/src/components/ui/tabs";
-import { Skeleton } from "@/src/components/ui/skeleton";
+} from "../../../src/components/ui/tabs";
+import { Skeleton } from "../../../src/components/ui/skeleton";
 import { Package, Truck, Calendar, Clock, ShoppingBag } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
+
+interface OrderDetail {
+  CollectionAddress?: {
+    City: string;
+    Postcode: string;
+    Country: { Title: string };
+  };
+  DeliveryAddress?: {
+    City: string;
+    Postcode: string;
+    Country: { Title: string };
+  };
+  TransitTimeEstimate?: number;
+  Consignment?: {
+    Packages: Array<{
+      Weight: number;
+      Length: number;
+      Width: number;
+      Height: number;
+    }>;
+  };
+  ServiceResults?: Array<{
+    ServiceName: string;
+    CarrierName: string;
+    TransitTimeEstimate: number;
+    TotalCost: {
+      TotalCostGrossWithCollection: number;
+    };
+  }>;
+}
 
 interface Order {
   _id: string;
@@ -32,7 +62,7 @@ interface Order {
   trackingNumber?: string;
   serviceType?: string;
   carrierName?: string;
-  orderDetails: any;
+  orderDetails: OrderDetail;
 }
 
 export default function OrdersPage() {
@@ -62,11 +92,11 @@ export default function OrdersPage() {
           throw new Error("Failed to fetch orders");
         }
 
-        const data = await response.json();
+        const data: { orders: Order[] } = await response.json();
         setOrders(data.orders);
       } catch (err) {
         console.error("Error fetching orders:", err);
-        // Don't set error state here, we'll handle empty orders differently
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
@@ -110,6 +140,8 @@ export default function OrdersPage() {
             View and track all your shipping orders
           </p>
         </div>
+
+        {error && <div className="mb-4 text-red-600">{error}</div>}
 
         <Tabs
           defaultValue="all"

@@ -1,5 +1,3 @@
-// Update the Country model to use the simplified mongoose connection
-import { connectToDatabase } from "@/src/lib/mongodb";
 import mongoose from "mongoose";
 
 // Define the schema for the Country model

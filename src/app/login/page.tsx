@@ -5,12 +5,12 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LogIn, AlertCircle, Mail, Lock, Package } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
-import { Alert, AlertDescription } from "@/src/components/ui/alert";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
-import SiteLayout from "@/src/components/layout/site-layout";
+import { Button } from "../../../src/components/ui/button";
+import { Input } from "../../../src/components/ui/input";
+import { Label } from "../../../src/components/ui/label";
+import { Alert, AlertDescription } from "../../../src/components/ui/alert";
+import { useAuthStore } from "../../../src/lib/store/useAuthStore";
+import SiteLayout from "../../../src/components/layout/site-layout";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -52,8 +52,8 @@ export default function LoginPage() {
 
       console.log("Login successful");
 
-      // Store user data in Zustand store (but not the token)
-      login(data.user);
+      // Store user data and token in Zustand store
+      login(data.user, data.token);
 
       // Wait for state to update before redirecting
       setTimeout(() => {

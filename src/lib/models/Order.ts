@@ -1,17 +1,47 @@
-import { connectToDatabase } from "@/src/lib/mongodb";
 import mongoose from "mongoose";
 import type { Document } from "mongoose";
 
 // Define the interface for Order document
 export interface IOrder extends Document {
   userId: mongoose.Types.ObjectId;
-  orderDetails: any; // Store the entire API response as JSON
+  orderDetails: OrderDetail;
   orderDate: Date;
   totalAmount: number;
   status: string;
   trackingNumber?: string;
   serviceType?: string;
   carrierName?: string;
+}
+
+// Define the interface for OrderDetail
+export interface OrderDetail {
+  CollectionAddress?: {
+    City: string;
+    Postcode: string;
+    Country: { Title: string };
+  };
+  DeliveryAddress?: {
+    City: string;
+    Postcode: string;
+    Country: { Title: string };
+  };
+  TransitTimeEstimate?: number;
+  Consignment?: {
+    Packages: Array<{
+      Weight: number;
+      Length: number;
+      Width: number;
+      Height: number;
+    }>;
+  };
+  ServiceResults?: Array<{
+    ServiceName: string;
+    CarrierName: string;
+    TransitTimeEstimate: number;
+    TotalCost: {
+      TotalCostGrossWithCollection: number;
+    };
+  }>;
 }
 
 // Create the Order schema

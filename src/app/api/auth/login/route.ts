@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import User from "@/src/lib/models/User";
-import { generateToken } from "@/src/lib/auth/jwt";
+import User from "../../../../../src/lib/models/User";
+import { generateToken } from "../../../../../src/lib/auth/jwt";
 
 export async function POST(request: Request) {
   try {

@@ -11,9 +11,9 @@ import {
   Home,
   Package,
 } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
+import { Button } from "../../../src/components/ui/button";
 import { useState, useEffect } from "react";
-import { useAuthStore } from "@/src/lib/store/useAuthStore";
+import { useAuthStore } from "../../../src/lib/store/useAuthStore";
 import { useRouter, usePathname } from "next/navigation";
 
 export default function Header() {
