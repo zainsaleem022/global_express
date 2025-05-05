@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/src/lib/mongodb";
+import { connectToDatabase } from "@/src/lib/mongodb";
+import Country from "@/src/lib/models/Country";
 
 export async function GET() {
   try {
-    const client = await clientPromise;
-    const db = client.db("transglobal");
-    const countries = await db.collection("countries").find({}).toArray();
-
+    await connectToDatabase(); // Ensure the connection is established
+    // Fetch countries using Mongoose model
+    const countries = await Country.find({});
     return NextResponse.json(countries);
   } catch (error) {
     console.error("Error fetching countries:", error);

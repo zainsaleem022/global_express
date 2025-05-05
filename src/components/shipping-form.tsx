@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { ArrowRight, AlertCircle, Info } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -18,6 +19,7 @@ import {
 } from "@/src/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/src/components/ui/alert";
 import ServiceResultCard from "./ServiceResultCard";
+import type { ICountry } from "@/src/lib/models/Country"; // Import the interface
 
 interface PackageDimensions {
   weight: string;
@@ -42,13 +44,6 @@ interface FormData {
   packagingType: string;
   measurementUnit: string;
   packages: PackageDimensions[];
-}
-
-interface Country {
-  _id: string;
-  CountryID: number;
-  Title: string;
-  CountryCode: string;
 }
 
 interface ServiceResult {
@@ -122,6 +117,49 @@ const isValidNumber = (value: string): boolean => {
   return !isNaN(num) && num > 0;
 };
 
+// Add item type mapping
+const ITEM_TYPE_MAP = {
+  parcel: "Parcel",
+  document: "Document",
+  pallet: "Pallet",
+} as const;
+
+type ItemTypeKey = keyof typeof ITEM_TYPE_MAP;
+
+const convertToMetric = (
+  weight: string,
+  length: string,
+  width: string,
+  height: string
+) => {
+  const weightInKg = weight
+    ? (Number.parseFloat(weight) / 2.20462).toFixed(2)
+    : "";
+  const lengthInCm = length
+    ? (Number.parseFloat(length) * 2.54).toFixed(2)
+    : "";
+  const widthInCm = width ? (Number.parseFloat(width) * 2.54).toFixed(2) : "";
+  const heightInCm = height
+    ? (Number.parseFloat(height) * 2.54).toFixed(2)
+    : "";
+
+  return {
+    weight: weightInKg,
+    length: lengthInCm,
+    width: widthInCm,
+    height: heightInCm,
+  };
+};
+
+// Function to fetch countries
+const fetchCountries = async (): Promise<ICountry[]> => {
+  const response = await fetch("/api/countries");
+  if (!response.ok) {
+    throw new Error("Failed to fetch countries");
+  }
+  return response.json();
+};
+
 export default function ShippingForm() {
   const [formData, setFormData] = useState<FormData>({
     fromCountry: "",
@@ -135,7 +173,6 @@ export default function ShippingForm() {
     packages: [{ weight: "", length: "", width: "", height: "" }],
   });
 
-  const [countries, setCountries] = useState<Country[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [apiNotifications, setApiNotifications] = useState<ApiNotification[]>(
@@ -145,30 +182,25 @@ export default function ShippingForm() {
   const [results, setResults] = useState<ServiceResult[] | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Use TanStack Query to fetch and cache countries
+  const {
+    data: countries = [],
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["countries"],
+    queryFn: fetchCountries,
+    staleTime: Number.POSITIVE_INFINITY, // Never consider the data stale
+    gcTime: Number.POSITIVE_INFINITY, // Never garbage collect the data
+    retry: 3, // Retry failed requests 3 times
+  });
+
   useEffect(() => {
     if (results) {
       console.log("Service Results:", results);
       console.log("Number of service results:", results.length);
     }
   }, [results]);
-
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const response = await fetch("/api/countries");
-        if (!response.ok) {
-          throw new Error("Failed to fetch countries");
-        }
-        const data = await response.json();
-        setCountries(data);
-      } catch (error) {
-        console.error("Error fetching countries:", error);
-        setSubmitError("Failed to load countries");
-      }
-    };
-
-    fetchCountries();
-  }, []);
 
   useEffect(() => {
     // Update packages array when quantity changes
@@ -244,6 +276,7 @@ export default function ShippingForm() {
         ...newPackages[index],
         [field]: cleanValue,
       };
+
       newPackages[index] = validatePackageDimensions(newPackages[index]);
       return {
         ...prev,
@@ -283,6 +316,23 @@ export default function ShippingForm() {
       return;
     }
 
+    // Convert package dimensions if measurement unit is lb/inches
+    const submissionData = {
+      ...formData,
+      packages: formData.packages.map((pkg) => {
+        if (formData.measurementUnit === "lb/inches") {
+          const { weight, length, width, height } = convertToMetric(
+            pkg.weight,
+            pkg.length,
+            pkg.width,
+            pkg.height
+          );
+          return { weight, length, width, height };
+        }
+        return pkg; // Return the package as is if already in kg/cm
+      }),
+    };
+
     setIsSubmitting(true);
 
     try {
@@ -298,8 +348,9 @@ export default function ShippingForm() {
         throw new Error("Selected country not found");
       }
 
-      const submissionData = {
-        ...formData,
+      const finalSubmissionData = {
+        ...submissionData,
+        itemType: ITEM_TYPE_MAP[formData.itemType as ItemTypeKey],
         fromCountry: {
           CountryID: fromCountryData.CountryID,
           CountryCode: fromCountryData.CountryCode,
@@ -317,7 +368,7 @@ export default function ShippingForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(finalSubmissionData),
       });
 
       const data: ApiResponse = await response.json();
@@ -369,6 +420,18 @@ export default function ShippingForm() {
 
   return (
     <div className="space-y-8">
+      {/* Display error if countries fetch fails */}
+      {isError && (
+        <Alert className="bg-red-50 border-red-200 mb-6">
+          <AlertCircle className="h-5 w-5 text-red-600" />
+          <AlertTitle className="text-red-800 font-medium">Error</AlertTitle>
+          <AlertDescription className="text-red-700">
+            Failed to load countries:{" "}
+            {error instanceof Error ? error.message : "Unknown error"}
+          </AlertDescription>
+        </Alert>
+      )}
+
       <form onSubmit={handleSubmit} className="grid gap-6">
         {/* From/To Section - Stacks on mobile */}
         <div className="grid gap-6 sm:grid-cols-2">
@@ -379,6 +442,7 @@ export default function ShippingForm() {
             <Select
               value={formData.fromCountry}
               onValueChange={(value) => handleInputChange("fromCountry", value)}
+              disabled={isError} // Disable if countries failed to load
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a country" />
@@ -416,6 +480,7 @@ export default function ShippingForm() {
             <Select
               value={formData.toCountry}
               onValueChange={(value) => handleInputChange("toCountry", value)}
+              disabled={isError} // Disable if countries failed to load
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a country" />
@@ -480,8 +545,8 @@ export default function ShippingForm() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="parcel">Parcel/Large Letter</SelectItem>
-                  <SelectItem value="pallet">Pallet</SelectItem>
                   <SelectItem value="document">Document</SelectItem>
+                  <SelectItem value="pallet">Pallet</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -657,7 +722,7 @@ export default function ShippingForm() {
             type="submit"
             size="lg"
             className="gap-2 bg-blue-600 px-8 w-full sm:w-auto hover:bg-blue-700"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isError}
           >
             {isSubmitting ? "Submitting..." : "Get a quote"}
             {!isSubmitting && <ArrowRight className="h-4 w-4" />}
@@ -698,7 +763,7 @@ export default function ShippingForm() {
               </AlertTitle>
               <AlertDescription className="text-blue-700">
                 <p className="mb-2">
-                  We couldn&apos;t find any delivery services for your specified
+                  We couldn't find any delivery services for your specified
                   route and package details.
                 </p>
                 <div className="mt-4 bg-white p-4 rounded-md border border-blue-100">
@@ -723,7 +788,7 @@ export default function ShippingForm() {
                   </ul>
                   <div className="mt-4 text-sm text-gray-700">
                     Try adjusting your package details or contact our customer
-                    service for assistance.
+                    customer service for assistance.
                   </div>
                 </div>
               </AlertDescription>

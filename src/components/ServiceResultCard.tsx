@@ -100,7 +100,7 @@ export default function ServiceResultCard({ result }: ServiceResultCardProps) {
                   <Package className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500">Weight</div>
+                  <div className="text-xs text-gray-500">Chargeable Weight</div>
                   <div className="font-semibold">
                     {result.ChargeableWeight} kg
                   </div>

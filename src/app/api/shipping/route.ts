@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const data = await request.json();
 
     // Log the received data
-    // console.log("Received shipping form data:", JSON.stringify(data, null, 2));
+    console.log("Received shipping form data:", JSON.stringify(data, null, 2));
 
     // Validate quantity and packages
     const quantity = Number.parseInt(data.quantity, 10);
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       },
       Shipment: {
         Consignment: {
-          ItemType: "Parcel", // Use frontend itemType directly as it matches API
+          ItemType: data.itemType, // Use the item type from the request
           Packages: packages,
         },
         CollectionAddress: {
